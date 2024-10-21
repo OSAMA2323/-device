@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تطبيق تتبع وصيانة الأجهزة</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        header {
+            text-align: center;
+            background: #35424a;
+            color: #ffffff;
+            padding: 10px 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        input[type="text"], input[type="date"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px;
+            background: #35424a;
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .device-list, .report-list {
+            margin-top: 20px;
+        }
+        .device-item, .report-item {
+            background: #f9f9f9;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .search-container, .filter-container {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>تطبيق تتبع وصيانة الأجهزة</h1>
+</header>
+
+<div class="container">
+    <h2>إضافة جهاز</h2>
+    <input type="text" id="deviceName" placeholder="اسم الجهاز" required>
+    <input type="text" id="serialNumber" placeholder="رقم السيريال" required>
+    <input type="date" id="purchaseDate" placeholder="تاريخ الشراء" required>
+    <button onclick="addDevice()">إضافة</button>
+
+    <div class="device-list" id="deviceList"></div>
+
+    <h2>إضافة تقرير صيانة</h2>
+    <input type="text" id="reportDeviceName" placeholder="اسم الجهاز" required>
+    <input type="text" id="reportSerialNumber" placeholder="رقم السيريال" required>
+    <input type="text" id="reportDetails" placeholder="تفاصيل الصيانة" required>
+    <input type="date" id="reportDate" placeholder="تاريخ الصيانة" required>
+    <button onclick="addReport()">إضافة تقرير</button>
+
+    <div class="search-container">
+        <input type="text" id="searchReport" placeholder="البحث عن تقارير الصيانة..." onkeyup="searchReports()">
+    </div>
+
+    <div class="filter-container">
+        <h3>فلترة حسب اسم الجهاز</h3>
+        <input type="text" id="filterDeviceName" placeholder="اسم الجهاز" onkeyup="filterReports()">
+    </div>
+
+    <div class="filter-container">
+        <h3>فلترة حسب رقم السيريال</h3>
+        <input type="text" id="filterSerialNumber" placeholder="رقم السيريال" onkeyup="filterReports()">
+    </div>
+
+    <div class="filter-container">
+        <h3>فلترة حسب تاريخ الصيانة</h3>
+        <input type="date" id="startDate" placeholder="تاريخ البداية" onchange="filterReports()">
+        <input type="date" id="endDate" placeholder="تاريخ النهاية" onchange="filterReports()">
+    </div>
+
+    <div class="report-list" id="reportList"></div>
+</div>
+
+<script>
+    const deviceList = [];
+    const reportList = [];
+
+    function addDevice() {
+        const name = document.getElementById('deviceName').value;
+        const serial = document.getElementById('serialNumber').value;
+        const date = document.getElementById('purchaseDate').value;
+
+        if (name && serial && date) {
+            const device = {
+                name: name,
+                serial: serial,
+                date: date
+            };
+            deviceList.push(device);
+            document.getElementById('deviceName').value = '';
+            document.getElementById('serialNumber').value = '';
+            document.getElementById('purchaseDate').value = '';
+            displayDevices();
+        }
+    }
+
+    function displayDevices() {
+        const list = document.getElementById('deviceList');
+        list.innerHTML = '';
+        deviceList.forEach((device) => {
+            list.innerHTML += `
+                <div class="device-item">
+                    <strong>${device.name}</strong><br>
+                    رقم السيريال: ${device.serial}<br>
+                    تاريخ الشراء: ${device.date}
+                </div>
+            `;
+        });
+    }
+
+    function addReport() {
+        const reportDeviceName = document.getElementById('reportDeviceName').value;
+        const reportSerialNumber = document.getElementById('reportSerialNumber').value;
+        const reportDetails = document.getElementById('reportDetails').value;
+        const reportDate = document.getElementById('reportDate').value;
+
+        if (reportDeviceName && reportSerialNumber && reportDetails && reportDate) {
+            const report = {
+                deviceName: reportDeviceName,
+                serialNumber: reportSerialNumber,
+                details: reportDetails,
+                date: reportDate
+            };
+            reportList.push(report);
+            document.getElementById('reportDeviceName').value = '';
+            document.getElementById('reportSerialNumber').value = '';
+            document.getElementById('reportDetails').value = '';
+            document.getElementById('reportDate').value = '';
+            displayReports();
+        }
+    }
+
+    function displayReports(filteredReports = reportList) {
+        const list = document.getElementById('reportList');
+        list.innerHTML = '';
+        filteredReports.forEach((report) => {
+            list.innerHTML += `
+                <div class="report-item">
+                    <strong>${report.deviceName}</strong><br>
+                    رقم السيريال: ${report.serialNumber}<br>
+                    تفاصيل الصيانة: ${report.details}<br>
+                    تاريخ الصيانة: ${report.date}
+                </div>
+            `;
+        });
+    }
+
+    function searchReports() {
+        const query = document.getElementById('searchReport').value.toLowerCase();
+        const filteredReports = reportList.filter(report => 
+            report.deviceName.toLowerCase().includes(query)
+        );
+        displayReports(filteredReports);
+    }
+
+    function filterReports() {
+        const filterName = document.getElementById('filterDeviceName').value.toLowerCase();
+        const filterSerial = document.getElementById('filterSerialNumber').value.toLowerCase();
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+
+        const filteredReports = reportList.filter(report => {
+            const reportDate = new Date(report.date);
+            const matchesName = report.deviceName.toLowerCase().includes(filterName);
+            const matchesSerial = report.serialNumber.toLowerCase().includes(filterSerial);
+            const matchesDate = (!startDate || reportDate >= new Date(startDate)) && 
+                                (!endDate || reportDate <= new Date(endDate));
+            return matchesName && matchesSerial && matchesDate;
+        });
+        
+        displayReports(filteredReports);
+    }
+</script>
+
+</body>
+</https>
